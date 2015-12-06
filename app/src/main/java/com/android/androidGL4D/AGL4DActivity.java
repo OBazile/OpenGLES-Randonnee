@@ -26,7 +26,7 @@ public class AGL4DActivity extends Activity {
 
     @Override protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
-        mView = new AGL4DView(getApplication());
+        mView = new AGL4DView(getApplication(), getAssets());
 	    setContentView(mView);
     }
 

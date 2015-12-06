@@ -7,7 +7,8 @@ varying vec3 vsoNormal;
 varying vec4 vsoModPosition;
 varying vec4 vsoPosition;
 
-mediump vec4 gl_FragColor;
+//mediump vec4 gl_FragColor;
+precision mediump float;
 
 void main(void) {
   

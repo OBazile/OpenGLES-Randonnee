@@ -33,6 +33,7 @@ package com.android.androidGL4D;
 
 
 import android.content.Context;
+import android.content.res.AssetManager;
 import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
 import android.util.Log;
@@ -77,10 +78,14 @@ class AGL4DView extends GLSurfaceView {
     private static String _fnightbasictoonshader = null;
     private static boolean _hasInit = false;
     private static Context context;
-    public AGL4DView(Context context) {
+    private static AssetManager mAssetManager;
+
+
+    public AGL4DView(Context context, AssetManager assetManager) {
         super(context);
         Log.d("bla", "init view");
         this.context = context;
+        mAssetManager = assetManager;
 
         if(_vshader == null)
             _vshader = readRawTextFile(getContext(), R.raw.basic_vs);
@@ -364,7 +369,7 @@ class AGL4DView extends GLSurfaceView {
         public void onDrawFrame(GL10 gl) {
             if(!_hasInit) {
 
-                AGL4DLib.init(_vshader, _fshader, _toonshader, _fnightbasicshader, _fnightbasictoonshader);
+                AGL4DLib.init(mAssetManager,_vshader, _fshader, _toonshader, _fnightbasicshader, _fnightbasictoonshader);
                 _hasInit = true;
             }
             AGL4DLib.draw();
@@ -378,7 +383,7 @@ class AGL4DView extends GLSurfaceView {
         public void onSurfaceCreated(GL10 gl, EGLConfig config) {
             initTime();
             Log.d("bla", "will init lib");
-            AGL4DLib.init(_vshader, _fshader, _toonshader, _fnightbasicshader, _fnightbasictoonshader);
+            AGL4DLib.init(mAssetManager, _vshader, _fshader, _toonshader, _fnightbasicshader, _fnightbasictoonshader);
             _hasInit = true;
         }
         private long _t0 = 0, _frames = 0;

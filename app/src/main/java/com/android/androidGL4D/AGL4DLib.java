@@ -26,7 +26,7 @@ public class AGL4DLib {
          System.loadLibrary("androidGL4D");
      }
 
-    public static native void init(String vshader, String fshader,
+    public static native void init(AssetManager assetManager, String vshader, String fshader,
                                    String toonshader, String fnightbasicshader, String fnightbasictoonshader);
     /**
      * @param width the current view width
@@ -34,6 +34,4 @@ public class AGL4DLib {
      */
      public static native void reshape(int width, int height);
      public static native void draw();
-
-    public static native void init_asset_manager(AssetManager assetManager);
 }

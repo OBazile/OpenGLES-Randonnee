@@ -4,7 +4,6 @@
 #include "GL4D/gl4droid.h"
 #include "image.h"
 #include <assert.h>
-#include <jni.h>
 #include <dlfcn.h>
 
 #define  LOG_TAG    "bla"
@@ -32,7 +31,7 @@ static void loop(GLfloat a0);
 
 
 //static GLuint _program;
-static GLuint _vPositionHandle;
+static GLuint _vPositionHandle, _vTextureHandle, _vNormalHandle;
 static GLfloat _yScale = 1.0f;
 static GLfloat _windowWidth = 1.0f, _windowHeight = 1.0f;
 //static int _windowWidth = 800, _windowHeight = 600;
@@ -52,6 +51,8 @@ GLuint texMArbre, texGArbre;
 GLuint texLune, texSoleil;
 
 double Imax,Jmax,Id,I,Jd,J,Id1,Jd1;
+
+static AAssetManager* asset_manager;
 
 uint8_t Pixels[W * H];
 
@@ -78,7 +79,7 @@ struct cam_t {
   GLfloat theta;
 };
 
-static cam_t _cam = {0, 1, 0, 0};
+static cam_t _cam = {0, 1, -100, 0};
 
 typedef struct arbre_t arbre_t;
 struct arbre_t{
@@ -175,13 +176,16 @@ static int init(const char * vs, const char * fs, const char * toons, const char
     _pId[1] = gl4droidCreateProgram(vs, toons);
     _pIdN[0] = gl4droidCreateProgram(vs, fnights);
     _pIdN[1] = gl4droidCreateProgram(vs, fnighttoons);
-    if (!_pId[0])
+    if (!_pId[0] && !_pId[1] && !_pIdN[0] && !_pIdN[1])
         return 0;
 
     LOGD("created programs");
     initData();
 
-    _vPositionHandle = glGetAttribLocation(_pId[0], "vPosition");
+    _vPositionHandle = glGetAttribLocation(_pId[0], "vsiPosition");
+    _vNormalHandle = glGetAttribLocation(_pId[0], "vsiNormal");
+    _vTextureHandle = glGetAttribLocation(_pId[0], "vsiTexCoord");
+    
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
     glEnable(GL_DEPTH_TEST);
@@ -289,7 +293,7 @@ GLuint load_texture(GLuint texture_object_id, const GLsizei width, const GLsizei
 GLuint load_png_asset_into_texture(const char* relative_path, GLuint texture_id) {
     assert(relative_path != NULL);
     LOGD("init loading image %s", relative_path);
-    const FileData png_file = get_asset_data(relative_path);
+    const FileData png_file = get_asset_data(asset_manager, relative_path);
     LOGD("getting raw image");
     const RawImageData raw_image_data =
             get_raw_image_data_from_png(png_file.data, png_file.data_length);
@@ -311,7 +315,6 @@ static void initData(void){
 
   GLfloat * data;
 
-    LOGD("will init data");
 
   memset(Pixels, 0, W * H * sizeof *Pixels);
   Pixels[0] = 0;         Pixels[W - 1] = 0;
@@ -321,9 +324,9 @@ static void initData(void){
   data = malloc((W - 1) * (H - 1) * 6 * 8 * sizeof * data);
   assert(data);
 
-    LOGD("memseted");
+
   for(i = 0, k = 0; i < H - 1; i++) {
-      LOGD("boucle %d", i);
+
     GLfloat z = cote(i, H), zp1 = cote(i + 1, H);
 
     for(j = 0; j < W - 1; j++) {
@@ -392,9 +395,6 @@ static void initData(void){
 			
   }
 
-    LOGD("boucle finie");
-    LOGD("creation data");
-
   GLfloat s4 = 5.0;
   GLfloat s5 = 5.0;
   GLfloat data3[] = {
@@ -415,7 +415,6 @@ static void initData(void){
     0.0f, 0.0f
   };
 
-    LOGD("data soleil");
   
   GLfloat d2= 100.0, dataSoleil[]={
 
@@ -436,7 +435,6 @@ static void initData(void){
     1.0f, 1.0f
 };
 
-    LOGD("data lune");
 
   GLfloat d3= 100.0, dataLune[]={
 
@@ -458,24 +456,23 @@ static void initData(void){
 };
 
   //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    LOGD("creation vertexbuffer data");
+
   genVertexArraysOES(8, _vao);
   bindVertexArrayOES(_vao[0]);
 
-  glEnableVertexAttribArray(0);
-  glEnableVertexAttribArray(1);
-  glEnableVertexAttribArray(2);
+  glEnableVertexAttribArray(_vPositionHandle);
+  glEnableVertexAttribArray(_vNormalHandle);
+  glEnableVertexAttribArray(_vTextureHandle);
 
   glGenBuffers(1, &_buffer);
   glBindBuffer(GL_ARRAY_BUFFER, _buffer);
   glBufferData(GL_ARRAY_BUFFER, (W - 1) * (H - 1) * 6 * 8 * sizeof *data, data, GL_STATIC_DRAW);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof *data, (const void *)0);  
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_TRUE,  8 * sizeof *data, (const void *)(3 * sizeof *data));
-  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof *data, (const void *)(6 * sizeof *data));
+  glVertexAttribPointer(_vPositionHandle, 3, GL_FLOAT, GL_FALSE, 8 * sizeof *data, (const void *)0);  
+  glVertexAttribPointer(_vNormalHandle, 3, GL_FLOAT, GL_TRUE,  8 * sizeof *data, (const void *)(3 * sizeof *data));
+  glVertexAttribPointer(_vTextureHandle, 2, GL_FLOAT, GL_FALSE, 8 * sizeof *data, (const void *)(6 * sizeof *data));
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   bindVertexArrayOES(0);
 
-    LOGD("fini vertexbuffer data");
 
   //TEXTURE EAU///////////////////////////////////////////////////
 
@@ -528,16 +525,16 @@ static void initData(void){
   // TEXTURE MOYEN ARBRE/////////////////////////////////////////
 
   /*bindVertexArrayOES(_vao[6]);
-  glEnableVertexAttribArray(0);
-  glEnableVertexAttribArray(1);
-  glEnableVertexAttribArray(2);
+  glEnableVertexAttribArray(_vPositionHandle);
+  glEnableVertexAttribArray(_vNormalHandle);
+  glEnableVertexAttribArray(_vTextureHandle);
 
   glGenBuffers(1, &_buffer);
   glBindBuffer(GL_ARRAY_BUFFER, _buffer);
   glBufferData(GL_ARRAY_BUFFER, sizeof data3, data3, GL_STATIC_DRAW);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (const void *)0);
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_TRUE,  0, (const void *)(4 * 3 * sizeof *data3));
-  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (const void *)(4 * 6 * sizeof *data3));
+  glVertexAttribPointer(_vPositionHandle, 3, GL_FLOAT, GL_FALSE, 0, (const void *)0);
+  glVertexAttribPointer(_vNormalHandle, 3, GL_FLOAT, GL_TRUE,  0, (const void *)(4 * 3 * sizeof *data3));
+  glVertexAttribPointer(_vTextureHandle, 2, GL_FLOAT, GL_FALSE, 0, (const void *)(4 * 6 * sizeof *data3));
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   bindVertexArrayOES(0);
 
@@ -559,16 +556,16 @@ static void initData(void){
   // TEXTURE GRAND ARBRE /////////////////////////////////////
 
   bindVertexArrayOES(_vao[7]);
-  glEnableVertexAttribArray(0);
-  glEnableVertexAttribArray(1);
-  glEnableVertexAttribArray(2);
+  glEnableVertexAttribArray(_vPositionHandle);
+  glEnableVertexAttribArray(_vNormalHandle);
+  glEnableVertexAttribArray(_vTextureHandle);
 
   glGenBuffers(1, &_buffer);
   glBindBuffer(GL_ARRAY_BUFFER, _buffer);
   glBufferData(GL_ARRAY_BUFFER, sizeof data3, data3, GL_STATIC_DRAW);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (const void *)0);
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_TRUE,  0, (const void *)(4 * 3 * sizeof *data3));
-  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (const void *)(4 * 6 * sizeof *data3));
+  glVertexAttribPointer(_vPositionHandle, 3, GL_FLOAT, GL_FALSE, 0, (const void *)0);
+  glVertexAttribPointer(_vNormalHandle, 3, GL_FLOAT, GL_TRUE,  0, (const void *)(4 * 3 * sizeof *data3));
+  glVertexAttribPointer(_vTextureHandle, 2, GL_FLOAT, GL_FALSE, 0, (const void *)(4 * 6 * sizeof *data3));
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   bindVertexArrayOES(0);
 
@@ -587,16 +584,16 @@ static void initData(void){
 
 //  TEXTURE SOLEIL ///////////////////////////////////////////////////////
   bindVertexArrayOES(_vao[6]);
-  glEnableVertexAttribArray(0);
-  glEnableVertexAttribArray(1);
-  glEnableVertexAttribArray(2);
+  glEnableVertexAttribArray(_vPositionHandle);
+  glEnableVertexAttribArray(_vNormalHandle);
+  glEnableVertexAttribArray(_vTextureHandle);
 
   glGenBuffers(1, &_buffer);
   glBindBuffer(GL_ARRAY_BUFFER, _buffer);
   glBufferData(GL_ARRAY_BUFFER, sizeof dataSoleil, dataSoleil, GL_STATIC_DRAW);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (const void *)0);
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_TRUE,  0, (const void *)(4 * 3 * sizeof *dataSoleil));
-  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (const void *)(4 * 6 * sizeof *dataSoleil));
+  glVertexAttribPointer(_vPositionHandle, 3, GL_FLOAT, GL_FALSE, 0, (const void *)0);
+  glVertexAttribPointer(_vNormalHandle, 3, GL_FLOAT, GL_TRUE,  0, (const void *)(4 * 3 * sizeof *dataSoleil));
+  glVertexAttribPointer(_vTextureHandle, 2, GL_FLOAT, GL_FALSE, 0, (const void *)(4 * 6 * sizeof *dataSoleil));
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   bindVertexArrayOES(0);
 
@@ -609,16 +606,16 @@ static void initData(void){
 //  TEXTURE LUNE ///////////////////////////////////////////////////////
 
   bindVertexArrayOES(_vao[7]);
-  glEnableVertexAttribArray(0);
-  glEnableVertexAttribArray(1);
-  glEnableVertexAttribArray(2);
+  glEnableVertexAttribArray(_vPositionHandle);
+  glEnableVertexAttribArray(_vNormalHandle);
+  glEnableVertexAttribArray(_vTextureHandle);
 
   glGenBuffers(1, &_buffer);
   glBindBuffer(GL_ARRAY_BUFFER, _buffer);
   glBufferData(GL_ARRAY_BUFFER, sizeof dataLune, dataLune, GL_STATIC_DRAW);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (const void *)0);
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_TRUE,  0, (const void *)(4 * 3 * sizeof *dataLune));
-  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (const void *)(4 * 6 * sizeof *dataLune));
+  glVertexAttribPointer(_vPositionHandle, 3, GL_FLOAT, GL_FALSE, 0, (const void *)0);
+  glVertexAttribPointer(_vNormalHandle, 3, GL_FLOAT, GL_TRUE,  0, (const void *)(4 * 3 * sizeof *dataLune));
+  glVertexAttribPointer(_vTextureHandle, 2, GL_FLOAT, GL_FALSE, 0, (const void *)(4 * 6 * sizeof *dataLune));
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   bindVertexArrayOES(0);
 
@@ -660,7 +657,7 @@ static void draw() {
     J = (int) ((W-1) *(((_cam.x/S)+1)/2));
     Jd = ((W-1) *(((_cam.x/S)+1.0)/2.0));
 
-    _cam.y = hauteur(Pixels,(I)*W+(J))+1.0;
+    _cam.y = 0;//hauteur(Pixels,(I)*W+(J))+1.0;
 
     _Soleil.theta += dt1 * dtheta2;
     _Soleil.z += -dt1 * 1800 * sin(_Soleil.theta);
@@ -670,20 +667,20 @@ static void draw() {
     _Lune.z += -dt1 * 1800 * sin(_Lune.theta);
     _Lune.y += -dt1 * 1800 * cos(_Lune.theta );
 
-    if(_keys[KLEFT]) {
-      _cam.theta += dt * dtheta;
-    }
-    if(_keys[KRIGHT]) {
-      _cam.theta -= dt * dtheta;
-    }
-    if(_keys[KUP]) {
-      _cam.x += -dt * pas * sin(_cam.theta);
-      _cam.z += -dt * pas * cos(_cam.theta);
-    }
-    if(_keys[KDOWN]) {
-      _cam.x += dt * pas * sin(_cam.theta);
-      _cam.z += dt * pas * cos(_cam.theta);
-    }
+//    if(_keys[KLEFT]) {
+//      _cam.theta += dt * dtheta;
+//    }
+//    if(_keys[KRIGHT]) {
+//      _cam.theta -= dt * dtheta;
+//    }
+//    if(_keys[KUP]) {
+//      _cam.x += -dt * pas * sin(_cam.theta);
+//      _cam.z += -dt * pas * cos(_cam.theta);
+//    }
+//    if(_keys[KDOWN]) {
+//      _cam.x += dt * pas * sin(_cam.theta);
+//      _cam.z += dt * pas * cos(_cam.theta);
+//    }
 
 
     if(pasOn == 1){
@@ -870,6 +867,8 @@ static void loop(GLfloat a0) {
 
      A la place du LookAt */
 
+    LOGD("camx: %0.2f camy: %0.2f camz: %0.2f", _cam.x, _cam.y, _cam.z);
+
   gl4duLookAtf(_cam.x, _cam.y, _cam.z,
 	       _cam.x - sin(_cam.theta), _cam.y, _cam.z - cos(_cam.theta),
 	       0.0, _cam.y, 0.0);
@@ -898,9 +897,9 @@ static void loop(GLfloat a0) {
 
    gl4duSendMatrix();
    bindVertexArrayOES(_vao[6]);
-   glEnableVertexAttribArray(0);
-   glEnableVertexAttribArray(1);
-   glEnableVertexAttribArray(2);
+   glEnableVertexAttribArray(_vPositionHandle);
+   glEnableVertexAttribArray(_vNormalHandle);
+   glEnableVertexAttribArray(_vTextureHandle);
    glBindTexture(GL_TEXTURE_2D, texSoleil);
    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
    glDisableVertexAttribArray(2);
@@ -915,9 +914,9 @@ static void loop(GLfloat a0) {
 
    gl4duSendMatrix();
    bindVertexArrayOES(_vao[7]);
-   glEnableVertexAttribArray(0);
-   glEnableVertexAttribArray(1);
-   glEnableVertexAttribArray(2);
+   glEnableVertexAttribArray(_vPositionHandle);
+   glEnableVertexAttribArray(_vNormalHandle);
+   glEnableVertexAttribArray(_vTextureHandle);
    glBindTexture(GL_TEXTURE_2D, texLune);
    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4); 
    glDisableVertexAttribArray(2); 
@@ -930,8 +929,10 @@ static void loop(GLfloat a0) {
 
 
 JNIEXPORT void JNICALL Java_com_android_androidGL4D_AGL4DLib_init(JNIEnv * env, jobject obj
-        , jstring vshader, jstring fshader, jstring toonshader, jstring fnightbasicshader, jstring fnightbasictoonshader) {
+        , jobject assetManager, jstring vshader, jstring fshader, jstring toonshader, jstring fnightbasicshader, jstring fnightbasictoonshader) {
     LOGD("Init java");
+
+    asset_manager = AAssetManager_fromJava(env, assetManager);
 
     char * vs = (*env)->GetStringUTFChars(env, vshader, NULL);
     char * fs = (*env)->GetStringUTFChars(env, fshader, NULL);

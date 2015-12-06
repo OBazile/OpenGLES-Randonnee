@@ -3,8 +3,6 @@
 #include "image.h"
 #include "libpng/png.h"
 #include <assert.h>
-#include <jni.h>
-#include <android/asset_manager_jni.h>
 
 
 #define  LOG_TAG    "bla"
@@ -34,6 +32,11 @@ static PngInfo read_and_update_info(const png_structp png_ptr, const png_infop i
 static DataHandle read_entire_png_image(
         const png_structp png_ptr, const png_infop info_ptr, const png_uint_32 height);
 static GLenum get_gl_color_format(const int png_color_format);
+
+static AAssetManager* asset_manager;
+
+
+
 
 RawImageData get_raw_image_data_from_png(const void* png_data, const int png_data_size) {
     assert(png_data != NULL && png_data_size > 8);
@@ -165,24 +168,36 @@ void release_raw_image_data(const RawImageData* data) {
     free((void*)data->data);
 }
 
-static AAssetManager* asset_manager;
 
-JNIEXPORT void JNICALL Java_com_android_androidGL4D_AGL4DLib_init_1asset_1manager
-    (JNIEnv * env, jclass jclazz, jobject java_asset_manager) {
-    LOGD("get asset java");
-    asset_manager = AAssetManager_fromJava(env, java_asset_manager);
-}
+//JNIEXPORT void JNICALL Java_com_android_androidGL4D_AGL4DLib_initassetmanager
+//    (JNIEnv * env, jclass jclazz, jobject java_asset_manager,jstring asset) {
+//
+//    LOGD("asset c");
+//
+//    const char *assetString = (*env)->GetStringUTFChars(env, asset, NULL);
+//    asset_manager = AAssetManager_fromJava(env, java_asset_manager);
+//
+//    initassetmanager(assetString);
+//
+//    (*env)->ReleaseStringUTFChars(env, asset, assetString);
+//
+//
+//}
 
-FileData get_asset_data(const char* relative_path) {
+FileData get_asset_data(AAssetManager* asset_manager, const char* relative_path) {
     assert(relative_path != NULL);
     LOGD("opening asset image %s", relative_path);
-    AAsset* asset = AAssetManager_open(asset_manager, relative_path, AASSET_MODE_STREAMING);
-    if(asset == NULL) {
-        LOGD("failed opening asset image %s", relative_path);
 
+    //FileData fileData;
+
+    AAsset* asset = AAssetManager_open(asset_manager, relative_path, AASSET_MODE_UNKNOWN);
+    LOGD("asset opening image %s", relative_path);
+    if(asset == NULL) {
+        LOGD("asset not found %s", relative_path);
     }
-    //assert(asset != NULL);
-    LOGD("finishing opening asset image %s", relative_path);
+
+    //AAsset_read(asset, AAsset_getBuffer(asset), AAsset_getLength(asset));
+    LOGD("read asset image %s", relative_path);
     return (FileData) { AAsset_getLength(asset), AAsset_getBuffer(asset), asset };
 }
 

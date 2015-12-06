@@ -1,4 +1,5 @@
 #include "GL4D/gl4droid.h"
+#include <android/asset_manager_jni.h>
 
 typedef struct {
     const int width;
@@ -8,14 +9,15 @@ typedef struct {
     const void* data;
 } RawImageData;
 
-#pragma once
+
 typedef struct {
     const long data_length;
     const void* data;
     const void* file_handle;
 } FileData;
 
-FileData get_asset_data(const char* relative_path);
+
+FileData get_asset_data(AAssetManager*, const char* relative_path);
 void release_asset_data(const FileData* file_data);
 
 /* Returns the decoded image data, or aborts if there's an error during decoding. */
