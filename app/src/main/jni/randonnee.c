@@ -172,8 +172,8 @@ static int init(const char * vs, const char * fs, const char * toons, const char
                                                         "glIsVertexArrayOES");
 
     
-    _pId[0] = gl4droidCreateProgram(vs, fs);
-    _pId[1] = gl4droidCreateProgram(vs, toons);
+    _pId[1] = gl4droidCreateProgram(vs, fs);
+    _pId[0] = gl4droidCreateProgram(vs, toons);
     _pIdN[0] = gl4droidCreateProgram(vs, fnights);
     _pIdN[1] = gl4droidCreateProgram(vs, fnighttoons);
     if (!_pId[0] && !_pId[1] && !_pIdN[0] && !_pIdN[1])
@@ -484,28 +484,28 @@ static void initData(void){
 
   //TEXTURE SABLE////////////////////////////////////////////
 
- if( (texSable = load_png_asset_into_texture("image/sable.png", texSable)) == NULL) {
+ if( (texSable = load_png_asset_into_texture("image/sable.png", texSable)) == 0) {
      LOGD("Impossible d'ouvrir le fichier : %s", "image/sable.png");
      exit(1);
  }
 
   //TEXTURE HERBE////////////////////////////////////////////////
 
-  if( (texHerbe = load_png_asset_into_texture("image/herbe.png", texHerbe)) == NULL){
+  if( (texHerbe = load_png_asset_into_texture("image/herbe.png", texHerbe)) == 0){
       LOGD("Impossible d'ouvrir le fichier : %s", "image/herbe.png");
     exit(1);
   }
 
   //TEXTURE ROCHE////////////////////////////////////////////////
 
-  if( (texRoche = load_png_asset_into_texture("image/roche.png", texRoche)) == NULL){
+  if( (texRoche = load_png_asset_into_texture("image/roche.png", texRoche)) == 0){
       LOGD("Impossible d'ouvrir le fichier : %s", "image/roche.png");
     exit(1);
   }
 
   //TEXTURE NEIGE////////////////////////////////////////////////
 
-  if( (texNeige = load_png_asset_into_texture("image/neige.png", texNeige)) == NULL){
+  if( (texNeige = load_png_asset_into_texture("image/neige.png", texNeige)) == 0){
       LOGD("Impossible d'ouvrir le fichier : %s", "image/neige.png");
     exit(1);
   }
@@ -657,7 +657,7 @@ static void draw() {
     J = (int) ((W-1) *(((_cam.x/S)+1)/2));
     Jd = ((W-1) *(((_cam.x/S)+1.0)/2.0));
 
-    _cam.y = 0;//hauteur(Pixels,(I)*W+(J))+1.0;
+    _cam.y = hauteur(Pixels,(I)*W+(J))+1.0;
 
     _Soleil.theta += dt1 * dtheta2;
     _Soleil.z += -dt1 * 1800 * sin(_Soleil.theta);
@@ -820,23 +820,23 @@ static void loop(GLfloat a0) {
 
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D,texEau);
-  glUniform1i(glGetUniformLocation(_pId[0], "myTexture"), 0);
+  glUniform1i(glGetUniformLocation(_pId[0], "myTexture0"), 0);
 
   glActiveTexture(GL_TEXTURE1);
   glBindTexture(GL_TEXTURE_2D,texSable);
-	glUniform1i(glGetUniformLocation(_pId[0], "myTexture[1]"), 1);
+	glUniform1i(glGetUniformLocation(_pId[0], "myTexture1"), 1);
 
   glActiveTexture(GL_TEXTURE2);
   glBindTexture(GL_TEXTURE_2D,texHerbe);
-  glUniform1i(glGetUniformLocation(_pId[0], "myTexture[2]"), 2);
+  glUniform1i(glGetUniformLocation(_pId[0], "myTexture2"), 2);
 
   glActiveTexture(GL_TEXTURE3);
   glBindTexture(GL_TEXTURE_2D,texRoche);
-  glUniform1i(glGetUniformLocation(_pId[0], "myTexture[3]"), 3);
+  glUniform1i(glGetUniformLocation(_pId[0], "myTexture3"), 3);
 
   glActiveTexture(GL_TEXTURE4);
   glBindTexture(GL_TEXTURE_2D,texNeige);
-  glUniform1i(glGetUniformLocation(_pId[0], "myTexture[4]"), 4);
+  glUniform1i(glGetUniformLocation(_pId[0], "myTexture4"), 4);
 
 
   if(_activeNight == 0){
@@ -867,11 +867,13 @@ static void loop(GLfloat a0) {
 
      A la place du LookAt */
 
-    LOGD("camx: %0.2f camy: %0.2f camz: %0.2f", _cam.x, _cam.y, _cam.z);
+
 
   gl4duLookAtf(_cam.x, _cam.y, _cam.z,
 	       _cam.x - sin(_cam.theta), _cam.y, _cam.z - cos(_cam.theta),
 	       0.0, _cam.y, 0.0);
+
+    LOGD("camx: %0.2f camy: %0.2f camz: %0.2f", _cam.x, _cam.y, _cam.z);
 
   /* gl4duRotatef(-_cam.theta * 180.0f / M_PI, 0.0, 1.0, 0.0);*/
 	//gl4duTranslatef(-_cam.x, -1.0, -_cam.z);
