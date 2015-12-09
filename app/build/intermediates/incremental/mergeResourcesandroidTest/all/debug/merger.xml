@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merger version="3"><dataSet config="main"><source path="C:\Users\bazile\Desktop\OpenGLES-Randonnee\app\src\androidTest\res"/><source path="C:\Users\bazile\Desktop\OpenGLES-Randonnee\app\build\generated\res\rs\androidTest\all\debug"/><source path="C:\Users\bazile\Desktop\OpenGLES-Randonnee\app\build\generated\res\resValues\androidTest\all\debug"/></dataSet><dataSet config="androidTestAll"><source path="C:\Users\bazile\Desktop\OpenGLES-Randonnee\app\src\androidTestAll\res"/></dataSet><mergedItems/></merger>

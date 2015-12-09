@@ -1,0 +1,24 @@
+See file:///C:/Users/bazile/Desktop/OpenGLES-Randonnee/app/build/tmp/compileMips64DebugAllAndroidGL4DSharedLibraryAndroidGL4DMainC/output.txt for all output for compileMips64DebugAllAndroidGL4DSharedLibraryAndroidGL4DMainC.
+compiling randonnee.c successful.
+C:\Users\bazile\Desktop\OpenGLES-Randonnee\app\src\main\jni\randonnee.c: In function 'Java_com_android_androidGL4D_AGL4DLib_init':
+C:\Users\bazile\Desktop\OpenGLES-Randonnee\app\src\main\jni\randonnee.c:949:17: warning: initialization discards 'const' qualifier from pointer target type
+     char * vs = (*env)->GetStringUTFChars(env, vshader, NULL);
+                 ^
+C:\Users\bazile\Desktop\OpenGLES-Randonnee\app\src\main\jni\randonnee.c:950:17: warning: initialization discards 'const' qualifier from pointer target type
+     char * fs = (*env)->GetStringUTFChars(env, fshader, NULL);
+                 ^
+C:\Users\bazile\Desktop\OpenGLES-Randonnee\app\src\main\jni\randonnee.c:951:21: warning: initialization discards 'const' qualifier from pointer target type
+     char * toonss = (*env)->GetStringUTFChars(env, toonshader, NULL);
+                     ^
+C:\Users\bazile\Desktop\OpenGLES-Randonnee\app\src\main\jni\randonnee.c:952:22: warning: initialization discards 'const' qualifier from pointer target type
+     char * fnights = (*env)->GetStringUTFChars(env, fnightbasicshader, NULL);
+                      ^
+C:\Users\bazile\Desktop\OpenGLES-Randonnee\app\src\main\jni\randonnee.c:953:26: warning: initialization discards 'const' qualifier from pointer target type
+     char * fnighttoons = (*env)->GetStringUTFChars(env, fnightbasictoonshader, NULL);
+                          ^
+
+compiling pngtest.c successful.
+
+compiling arm_init.c successful.
+
+Finished compileMips64DebugAllAndroidGL4DSharedLibraryAndroidGL4DMainC, see full log file:///C:/Users/bazile/Desktop/OpenGLES-Randonnee/app/build/tmp/compileMips64DebugAllAndroidGL4DSharedLibraryAndroidGL4DMainC/output.txt.

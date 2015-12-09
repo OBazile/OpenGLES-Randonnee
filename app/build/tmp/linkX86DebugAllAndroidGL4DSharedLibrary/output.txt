@@ -1,0 +1,4 @@
+See file:///C:/Users/bazile/Desktop/OpenGLES-Randonnee/app/build/tmp/linkX86DebugAllAndroidGL4DSharedLibrary/output.txt for all output for linkX86DebugAllAndroidGL4DSharedLibrary.
+linking libandroidGL4D.so successful.
+
+Finished linkX86DebugAllAndroidGL4DSharedLibrary, see full log file:///C:/Users/bazile/Desktop/OpenGLES-Randonnee/app/build/tmp/linkX86DebugAllAndroidGL4DSharedLibrary/output.txt.

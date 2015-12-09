@@ -41,8 +41,8 @@ static GLuint _vao[8] = {0,0,0,0,0,0,0,0};
 /*!\brief identifiant du (futur) buffer de data */
 static GLuint _buffer = 0;
 /*!\brief identifiant du (futur) GLSL program */
-static GLuint _pId[3] = {0,0};
-static GLuint _pIdN[3] = {0,0};
+static GLuint _pId[2] = {0,0};
+static GLuint _pIdN[2] = {0,0};
 /*!\brief identifiant de la texture */
 static GLuint _tId[7] = {0,0,0,0,0,0,0};
 
@@ -481,13 +481,16 @@ static void initData(void){
       LOGD("Impossible d'ouvrir le fichier : %s", "image/eau.jpg");
         exit(1);
   }
-
+    else
+      LOGD("Ok %s", "image/eau.jpg");
   //TEXTURE SABLE////////////////////////////////////////////
 
  if( (texSable = load_png_asset_into_texture("image/sable.png", texSable)) == 0) {
      LOGD("Impossible d'ouvrir le fichier : %s", "image/sable.png");
      exit(1);
  }
+ else
+     LOGD("Ok %s", "image/sable.jpg");
 
   //TEXTURE HERBE////////////////////////////////////////////////
 
@@ -495,6 +498,8 @@ static void initData(void){
       LOGD("Impossible d'ouvrir le fichier : %s", "image/herbe.png");
     exit(1);
   }
+  else
+      LOGD("Ok %s", "image/herbe.jpg");
 
   //TEXTURE ROCHE////////////////////////////////////////////////
 
@@ -502,6 +507,8 @@ static void initData(void){
       LOGD("Impossible d'ouvrir le fichier : %s", "image/roche.png");
     exit(1);
   }
+  else
+      LOGD("Ok %s", "image/roche.jpg");
 
   //TEXTURE NEIGE////////////////////////////////////////////////
 
@@ -509,6 +516,8 @@ static void initData(void){
       LOGD("Impossible d'ouvrir le fichier : %s", "image/neige.png");
     exit(1);
   }
+  else
+      LOGD("Ok %s", "image/neige.jpg");
 
   // LES ARBRES ////////////////////////////////////////////////
 
@@ -598,7 +607,7 @@ static void initData(void){
   bindVertexArrayOES(0);
 
 
-    if( (texSoleil = load_png_asset_into_texture("image/Sun1.png", texSoleil)) == NULL ) {
+    if( (texSoleil = load_png_asset_into_texture("image/Sun1.png", texSoleil)) == 0 ) {
         LOGD("Impossible d'ouvrir le fichier : %s", "image/Sun1.png");
     exit(1);
   }
@@ -619,7 +628,7 @@ static void initData(void){
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   bindVertexArrayOES(0);
 
-  if( (texLune = load_png_asset_into_texture("image/Lune.png", texLune)) == NULL ) {
+  if( (texLune = load_png_asset_into_texture("image/Lune.png", texLune)) == 0 ) {
       LOGD("Impossible d'ouvrir le fichier : %s", "image/Lune.png");
     exit(1);
   }
@@ -659,13 +668,13 @@ static void draw() {
 
     _cam.y = hauteur(Pixels,(I)*W+(J))+1.0;
 
-    _Soleil.theta += dt1 * dtheta2;
+   /* _Soleil.theta += dt1 * dtheta2;
     _Soleil.z += -dt1 * 1800 * sin(_Soleil.theta);
     _Soleil.y += -dt1 * 1800 * cos(_Soleil.theta);
 
     _Lune.theta += dt1 * dtheta2;
     _Lune.z += -dt1 * 1800 * sin(_Lune.theta);
-    _Lune.y += -dt1 * 1800 * cos(_Lune.theta );
+    _Lune.y += -dt1 * 1800 * cos(_Lune.theta );*/
 
 //    if(_keys[KLEFT]) {
 //      _cam.theta += dt * dtheta;
@@ -785,7 +794,9 @@ static void draw() {
  */
 static void loop(GLfloat a0) {
 
-  GLfloat * mv, temp[4] = {5 * sin(a0), 0.5, -5, 1.0}, lumpos[4];
+    GLfloat temps = 0.0f;
+  GLfloat * mv, temp[4] = {1.0, 100*sin(temps),1.0, 1.0}, lumpos[4];
+    temps += 0.01f;
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -798,11 +809,11 @@ static void loop(GLfloat a0) {
 
   if(_activeNight == 0){
     if(_activeToon == 1){
-      glUseProgram(_pId[1]);
+      glUseProgram(_pId[0]);
       glClearColor(0.0f, 0.4f, 0.9f, 0.0f);
     }
     else{
-      glUseProgram(_pId[0]);
+      glUseProgram(_pId[1]);
       glClearColor(0.0f, 0.4f, 0.9f, 0.0f);
     }
   }
@@ -817,14 +828,13 @@ static void loop(GLfloat a0) {
     }
   }
 
-
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D,texEau);
   glUniform1i(glGetUniformLocation(_pId[0], "myTexture0"), 0);
 
   glActiveTexture(GL_TEXTURE1);
   glBindTexture(GL_TEXTURE_2D,texSable);
-	glUniform1i(glGetUniformLocation(_pId[0], "myTexture1"), 1);
+    glUniform1i(glGetUniformLocation(_pId[0], "myTexture1"), 1);
 
   glActiveTexture(GL_TEXTURE2);
   glBindTexture(GL_TEXTURE_2D,texHerbe);
@@ -851,12 +861,12 @@ static void loop(GLfloat a0) {
   }
   else{
     if(_activeToon == 1){
-      glUniform1i(glGetUniformLocation(_pIdN[1], "myTexture"), 0);
-      glUniform1i(glGetUniformLocation(_pIdN[1], "heightMap"), 0);
+      glUniform1i(glGetUniformLocation(_pIdN[1], "myTexture"), 1);
+      glUniform1i(glGetUniformLocation(_pIdN[1], "heightMap"), 1);
     }
     else{
-      glUniform1i(glGetUniformLocation(_pIdN[0], "myTexture"), 0);
-      glUniform1i(glGetUniformLocation(_pIdN[0], "heightMap"), 0);
+      glUniform1i(glGetUniformLocation(_pIdN[0], "myTexture"), 1);
+      glUniform1i(glGetUniformLocation(_pIdN[0], "heightMap"), 1);
     }
   }
 
@@ -907,7 +917,7 @@ static void loop(GLfloat a0) {
    glDisableVertexAttribArray(2);
    glDisableVertexAttribArray(1);
    glDisableVertexAttribArray(0);
-    gl4duPopMatrix();*/
+    gl4duPopMatrix();
 
 
   gl4duTranslatef(_Lune.x,_Lune.y,_Lune.z);
@@ -924,7 +934,7 @@ static void loop(GLfloat a0) {
    glDisableVertexAttribArray(2); 
    glDisableVertexAttribArray(1); 
    glDisableVertexAttribArray(0);  
-    gl4duPopMatrix();
+    gl4duPopMatrix();*/
 
   bindVertexArrayOES(0);
 }
